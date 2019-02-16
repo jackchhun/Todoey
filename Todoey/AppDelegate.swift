@@ -16,6 +16,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // /Users/kimchhun/Library/Developer/CoreSimulator/Devices/8868F0AD-8C15-40EB-8881-818110BB1F69/data/Containers/Data/Application/F3BCD430-BEF5-4FC7-8402-C66D8D64A7C1/Documents
+        print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String)
+        
+        
+        print("didFinishLaunchingWithOptions")
         return true
     }
 
