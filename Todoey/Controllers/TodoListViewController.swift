@@ -13,33 +13,17 @@ class TodoListViewController: UITableViewController {
     let todoListArrayKey = "TodoListArray"
     
     var itemArray = [Item]()
+
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        do {
-            let newItem = Item()
-            newItem.title = "Find Mike"
-            itemArray.append(newItem)
-        }
-        
-        do {
-            let newItem = Item()
-            newItem.title = "Buy Eggos"
-            itemArray.append(newItem)
-        }
-        
-        do {
-            let newItem = Item()
-            newItem.title = "Destroy Demogorgon"
-            itemArray.append(newItem)
-        }
-        
-        if let items = defaults.array(forKey: todoListArrayKey) as? [Item] {
-            itemArray = items
-        }
+        print(dataFilePath)
+
+        loadItems()
     }
 
     // MARK: - Add new item
@@ -54,8 +38,8 @@ class TodoListViewController: UITableViewController {
             let newItem = Item()
             newItem.title = textField?.text! ?? ""
             self.itemArray.append(newItem)
-            self.defaults.set(self.itemArray, forKey: self.todoListArrayKey)
-            self.tableView.reloadData()
+            
+            self.saveItems()
         }
         alert.addAction(action)
         
@@ -67,7 +51,29 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    // MARK: - Model Manipulation Methods
+    func saveItems() {
+        let encoder = PropertyListEncoder()
+        
+        do {
+            let data = try encoder.encode(itemArray)    // Note there's no need of the self
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding item array, \(error)")
+        }
+        self.tableView.reloadData()
+    }
     
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding item array, \(error)")
+            }
+        }
+    }
 
 }
 
@@ -102,15 +108,10 @@ extension TodoListViewController {
         let item = itemArray[indexPath.row]
         
         item.done = !item.done
-        if !item.done {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
-        
+
+        saveItems()
+
         tableView.deselectRow(at: indexPath, animated: true)
-        
-        tableView.reloadData()
     }
     
 }
